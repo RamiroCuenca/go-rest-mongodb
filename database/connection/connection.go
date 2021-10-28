@@ -22,7 +22,7 @@ const (
 )
 
 // Get a collection from the database
-func GetCollection(collection string) *mongo.Collection {
+func GetCollection(collection string) *mongo.Client {
 
 	// Set up uri to connect to the database
 	uri := fmt.Sprintf("mongodb://%s:%s@%s:%s", user, password, host, port)
@@ -56,5 +56,5 @@ func GetCollection(collection string) *mongo.Collection {
 	}
 	fmt.Println(databases)
 
-	return client.Database(database).Collection(collection)
+	return client
 }
