@@ -31,14 +31,16 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	// Set context
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 
-	// 4. InsertOne document
-	result, err := seriesCollection.InsertOne(ctx, serie)
+	// 4. InsertOne document - result will contain InsertedID int
+	seriesCollection.InsertOne(ctx, serie)
+
+	// serie.ID = result.InsertedID // Does not work :(
 
 	// 5. Encode the result (Contains the id)
-	json.NewEncoder(w).Encode(result)
-	// json, _ := json.Marshal(result.InsertedID)
+	// json.NewEncoder(w).Encode(result) // Return the ObjectID
+	json, _ := json.Marshal(serie) // Return the serie but without ID
 
 	// 6. Send response
-	// common.SendResponse(w, http.StatusOK, []byte(json))
+	common.SendResponse(w, http.StatusOK, []byte(json))
 
 }
