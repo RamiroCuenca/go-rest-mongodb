@@ -41,7 +41,7 @@ func GetMongoClient() *mongo.Client {
 	}
 
 	// Remember to close connection
-	defer client.Disconnect(ctx)
+	// defer client.Disconnect(ctx)
 
 	// Check if the connection is stable
 	err = client.Ping(ctx, readpref.Primary())
