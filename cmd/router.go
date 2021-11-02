@@ -10,7 +10,8 @@ func GetRouter() *mux.Router {
 	mux := mux.NewRouter()
 
 	// Handlers
-	mux.HandleFunc("/series", series.Create).Methods("POST")
+	mux.HandleFunc("/series/create", series.Create).Methods("POST")
+	mux.HandleFunc("/series/getall", series.GetAll).Methods("GET")
 
 	return mux
 }
