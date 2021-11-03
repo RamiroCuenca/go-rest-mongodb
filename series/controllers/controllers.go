@@ -144,13 +144,50 @@ func GetById(w http.ResponseWriter, r *http.Request) {
 	common.SendResponse(w, http.StatusOK, []byte(data))
 }
 
-// // Delete by id
-// func Delete(w http.ResponseWriter, r *http.Request) {
-// 	// 1. Fetch the id from url
-// 	// 2. Connect to the mongo database and select collection
-// 	// 3. Setup context
-// 	// 4. Execute query
-// 	// 5. Send response
+// Delete by id
+func Delete(w http.ResponseWriter, r *http.Request) {
+	// 1. Fetch the id from url
+	// 2. Connect to the mongo database and select collection
+	// 3. Setup context
+	// 4. Execute query
+	// 5. Send response
 
-// 	//
-// }
+	// 1.
+	urlParam := r.URL.Query().Get("id")
+
+	// It's a string, should turn it into a primitive.ID
+	id, err := primitive.ObjectIDFromHex(urlParam)
+	if err != nil {
+		common.SendError(w, http.StatusBadRequest, []byte(`{"message": `+err.Error()+`}`))
+		return
+	}
+
+	// 2.
+	client := connection.GetMongoClient()
+	collection := client.Database("crud-database").Collection("series")
+
+	// 3.
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+
+	// 4.
+	result, err := collection.DeleteOne(ctx, bson.M{"_id": id})
+	if err != nil {
+		common.SendError(w, http.StatusBadRequest, []byte(`{"message": `+err.Error()+`}`))
+		return
+	}
+
+	if result.DeletedCount == 0 {
+		data := []byte(`{
+			"message": "Query executed succesfully but could not find any document that matchs with received _id",
+		}`)
+		common.SendResponse(w, http.StatusOK, data)
+		return
+	} else {
+		data := []byte(`{
+			"message": "Document deleted successfully",
+		}`)
+		common.SendResponse(w, http.StatusOK, data)
+		return
+	}
+
+}
