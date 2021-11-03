@@ -13,6 +13,7 @@ func GetRouter() *mux.Router {
 	mux.HandleFunc("/series/create", series.Create).Methods("POST")
 	mux.HandleFunc("/series/getall", series.GetAll).Methods("GET")
 	mux.HandleFunc("/series/getbyid", series.GetById).Methods("GET")
+	mux.HandleFunc("/series/deletebyid", series.Delete).Methods("DELETE")
 
 	return mux
 }
