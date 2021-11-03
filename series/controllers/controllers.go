@@ -10,6 +10,7 @@ import (
 	"github.com/RamiroCuenca/go-rest-mongodb/common"
 	"github.com/RamiroCuenca/go-rest-mongodb/database/connection"
 	"github.com/RamiroCuenca/go-rest-mongodb/series/models"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -46,9 +47,9 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	// 6. Send response
 	common.SendResponse(w, http.StatusOK, []byte(json))
-
 }
 
+// Fetch all series
 func GetAll(w http.ResponseWriter, r *http.Request) {
 	// 1. Connect to the database and setup collection variable
 	// 2. Create a Series Array where we can store data
@@ -99,3 +100,57 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 
 	common.SendResponse(w, http.StatusOK, []byte(resp))
 }
+
+// Fetch one serie by id
+func GetById(w http.ResponseWriter, r *http.Request) {
+	// 1. Obtain the id from the url params
+	// 2. Connect to the database and collection
+	// 3. Create a serie object where store data
+	// 4. Setup context
+	// 5. Execute query
+	// 6. Store data on serie object
+	// 7. Send response
+
+	// 1.
+	urlParam := r.URL.Query().Get("id") // Return a string, should convert it in primitive.ID
+	id, err := primitive.ObjectIDFromHex(urlParam)
+	if err != nil {
+		common.SendError(w, http.StatusBadRequest, []byte(`{"message": `+err.Error()+`}`))
+		return
+	}
+
+	// 2.
+	db := connection.GetMongoClient()
+	collection := db.Database("crud-database").Collection("series")
+
+	// 3.
+	var serie models.Series
+
+	// 4.
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+
+	// 5.
+	err = collection.FindOne(ctx, bson.M{"_id": id}).Decode(&serie)
+
+	// json.NewEncoder(w).Encode(serie) // Ugly
+
+	json, _ := json.Marshal(serie)
+
+	data := fmt.Sprintf(`{
+			"result": %s
+		}`, json)
+
+	// 6.
+	common.SendResponse(w, http.StatusOK, []byte(data))
+}
+
+// // Delete by id
+// func Delete(w http.ResponseWriter, r *http.Request) {
+// 	// 1. Fetch the id from url
+// 	// 2. Connect to the mongo database and select collection
+// 	// 3. Setup context
+// 	// 4. Execute query
+// 	// 5. Send response
+
+// 	//
+// }

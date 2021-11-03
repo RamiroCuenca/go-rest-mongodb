@@ -1,0 +1,11 @@
+make: Entering directory '/home/ramiro/go/src/github.com/RamiroCuenca/11-mongodb'
+docker run -d \
+      --name go-11-mongo \
+      -v /ramiro/mongodb/database:/data/db \
+      -p 27017:27017 \
+      -e MONGO_INITDB_ROOT_USERNAME=admin \
+      -e MONGO_INITDB_ROOT_PASSWORD=password \
+      -e MONGO_INITDB_DATABASE=go-11-database \
+      mongo
+make: Leaving directory '/home/ramiro/go/src/github.com/RamiroCuenca/11-mongodb'
+ 
