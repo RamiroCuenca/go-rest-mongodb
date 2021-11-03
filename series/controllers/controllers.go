@@ -189,5 +189,64 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		common.SendResponse(w, http.StatusOK, data)
 		return
 	}
+}
 
+// Update title from document by id
+func Update(w http.ResponseWriter, r *http.Request) {
+	// 1. Fetch the id and the updateParam from URL and convert into a primitive.ObjectID
+	// 2. Connect to the database and setup collection
+	// 3. Setup context and execute query
+	// 4. Send response
+
+	// 1.
+	idFromParam := r.URL.Query().Get("id")
+
+	id, err := primitive.ObjectIDFromHex(idFromParam)
+	if err != nil {
+		data := fmt.Sprintf(`{
+			"message": %s
+		}`, err.Error())
+		common.SendError(w, http.StatusBadRequest, []byte(data))
+		return
+	}
+
+	newTitle := r.URL.Query().Get("new_title")
+
+	// 2.
+	client := connection.GetMongoClient()
+
+	collection := client.Database("crud-database").Collection("series")
+
+	// 3.
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+
+	filter := bson.M{"_id": id}
+
+	update := bson.M{
+		"$set": bson.M{
+			"title": newTitle,
+		},
+	}
+
+	result, err := collection.UpdateOne(
+		ctx,
+		filter,
+		update,
+	)
+	if err != nil {
+		common.SendError(w, http.StatusBadRequest, []byte(`{"message": `+err.Error()+`}`))
+		return
+	}
+
+	if result.ModifiedCount == 0 {
+		data := []byte(`{"message": "Query executed successfully but could not fetch any document with provided id}`)
+		common.SendResponse(w, http.StatusOK, data)
+		return
+	}
+
+	data := fmt.Sprintf(`{
+		"message": "Document with {'_id': '%s'} updated successfully"
+	}`, idFromParam)
+
+	common.SendResponse(w, http.StatusOK, []byte(data))
 }
